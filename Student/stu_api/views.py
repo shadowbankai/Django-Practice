@@ -1,29 +1,31 @@
-from django.shortcuts import render
 from .models import Student
 from .serializers import StudentSerializer
-from rest_framework import generics, status, mixins
-from rest_framework.response import Response
-
+from rest_framework import generics
+from .validation import RollValidation
 # Create your views here.
 
 
-class StudentView(generics.GenericAPIView, mixins.CreateModelMixin, mixins.ListModelMixin,mixins.RetrieveModelMixin,
-                  mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+class StudentListView(generics.ListCreateAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
-    lookup_field = 'id'
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
+        self.clean()
         return self.create(request)
 
-    def get(self, request, id=None):
-        if id:
-            return self.retrieve(request)
-        else:
-            return self.list(request)
+    def get(self, request, *args, **kwargs):
+        return self.list(request)
 
-    def put(self, request, id=None):
-        return self.update(request, id)
 
-    def delete(self, request, id=None):
-        return self.destroy(request, id)
+class StudentUpdateView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request)
